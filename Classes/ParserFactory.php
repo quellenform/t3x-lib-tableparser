@@ -1,37 +1,29 @@
 <?php
 
-namespace Sonority\LibTableparser;
+namespace Quellenform\LibTableparser;
 
 /*
- * This file is part of the TYPO3 CMS project.
- *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, either version 2
- * of the License, or any later version.
+ * This file is part of the "lib_tableparser" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
  */
 
-use Sonority\LibTableparser\Exception\ParserException;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Quellenform\LibTableparser\Exception\ParserException;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\PathUtility;
 
 /**
  * The main factory class, which acts as the entrypoint for generating an Parser object which
  * is responsible for rendering an parser. Checks for the correct parser provider through the ParserRegistry.
  *
  * USAGE:
- *   use Sonority\LibTableparser\ParserFactory;
+ *   use Quellenform\LibTableparser\ParserFactory;
  *   $this->parserFactory = GeneralUtility::makeInstance(ParserFactory::class)->getData($absFileName);
- *
- * @author Stephan Kellermayr <stephan.kellermayr@gmail.com>
  */
 class ParserFactory
 {
-
     /**
      * @var ParserRegistry
      */
@@ -39,7 +31,6 @@ class ParserFactory
 
     /**
      * @param ParserRegistry $parserRegistry
-     * @return void
      */
     public function __construct(ParserRegistry $parserRegistry = null)
     {
@@ -50,9 +41,11 @@ class ParserFactory
      * @param string $filePath
      * @param string $identifier
      * @param array $options
+     *
      * @return Parser
+     * @throws ParserException
      */
-    public function getData($filePath, $identifier = null, $options = [])
+    public function getData($filePath, $identifier = '', $options = []): Parser
     {
         if (!self::isAllowedAbsPath($filePath)) {
             throw new ParserException('The filepath "' . $filePath . '" is not allowed by TYPO3.');
@@ -70,8 +63,10 @@ class ParserFactory
             $identifier = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
         }
         // Get parser configuration and merge it
-        ArrayUtility::mergeRecursiveWithOverrule($parserConfiguration,
-            $this->parserRegistry->getParserConfigurationByIdentifier($identifier));
+        ArrayUtility::mergeRecursiveWithOverrule(
+            $parserConfiguration,
+            $this->parserRegistry->getParserConfigurationByIdentifier($identifier)
+        );
 
         // Merge provided options into parserConfiguration
         if (is_array($options) && count($options)) {
@@ -81,7 +76,7 @@ class ParserFactory
         $parser = GeneralUtility::makeInstance(Parser::class);
 
         /** @var ParserProviderInterface $ParserProvider */
-        $parserProvider = GeneralUtility::makeInstance($parserConfiguration['provider']);
+        $parserProvider = GeneralUtility::makeInstance((string) $parserConfiguration['provider']);
         $parserProvider->parseData($parser, $filePath, $parserConfiguration['options']);
 
         return $parser;
@@ -91,13 +86,15 @@ class ParserFactory
      * Returns TRUE if the path is absolute, without backpath '..' and within 'upload_tmp_dir' OR within the lockRootPath
      *
      * @param string $path File path to evaluate
+     *
      * @return bool
      */
-    protected static function isAllowedAbsPath($path)
+    protected static function isAllowedAbsPath($path): bool
     {
         $lockRootPath = $GLOBALS['TYPO3_CONF_VARS']['BE']['lockRootPath'];
-        return GeneralUtility::isAbsPath($path) && GeneralUtility::validPathStr($path) && (GeneralUtility::isFirstPartOfStr($path,
-                ini_get('upload_tmp_dir')) || $lockRootPath && GeneralUtility::isFirstPartOfStr($path, $lockRootPath));
+        return PathUtility::isAbsolutePath($path) && GeneralUtility::validPathStr($path) && (str_starts_with(
+            $path,
+            ini_get('upload_tmp_dir')
+        ) || $lockRootPath && str_starts_with($path, $lockRootPath));
     }
-
 }

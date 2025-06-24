@@ -1,41 +1,33 @@
 <?php
 
-namespace Sonority\LibTableparser\ParserProvider;
+namespace Quellenform\LibTableparser\ParserProvider;
 
 /*
- * This file is part of the TYPO3 CMS project.
- *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, either version 2
- * of the License, or any later version.
+ * This file is part of the "lib_tableparser" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
  */
 
-use Sonority\LibTableparser\Parser;
-use Sonority\LibTableparser\ParserProviderInterface;
-use Sonority\LibTableparser\ParserHelper;
+use Quellenform\LibTableparser\Parser;
+use Quellenform\LibTableparser\ParserHelper;
+use Quellenform\LibTableparser\ParserProviderInterface;
 
 /**
  * Class CsvParserProvider
- *
- * @author Stephan Kellermayr <stephan.kellermayr@gmail.com>
  */
 class CsvParserProvider implements ParserProviderInterface
 {
-
     /**
      * Parse CSV
      *
      * @param Parser $parser
      * @param string $filePath
      * @param array $options
+     *
      * @return void
      */
-    public function parseData(Parser $parser, $filePath = '', array $options = [])
+    public function parseData(Parser $parser, $filePath = '', array $options = []): void
     {
         $data = [];
         $rows = [];
@@ -66,5 +58,4 @@ class CsvParserProvider implements ParserProviderInterface
         }
         $parser->setRows($rows);
     }
-
 }

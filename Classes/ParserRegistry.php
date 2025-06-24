@@ -1,25 +1,21 @@
 <?php
 
-namespace Sonority\LibTableparser;
+namespace Quellenform\LibTableparser;
 
 /*
- * This file is part of the TYPO3 CMS project.
- *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, either version 2
- * of the License, or any later version.
+ * This file is part of the "lib_tableparser" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
  */
 
-use Sonority\LibTableparser\Exception\ParserException;
-use Sonority\LibTableparser\ParserProvider\CsvParserProvider;
-use Sonority\LibTableparser\ParserProvider\OdsParserProvider;
-use Sonority\LibTableparser\ParserProvider\XmlParserProvider;
-use Sonority\LibTableparser\ParserProvider\XlsxParserProvider;
+use InvalidArgumentException;
+use Quellenform\LibTableparser\Exception\ParserException;
+use Quellenform\LibTableparser\ParserProvider\CsvParserProvider;
+use Quellenform\LibTableparser\ParserProvider\OdsParserProvider;
+use Quellenform\LibTableparser\ParserProvider\XlsxParserProvider;
+use Quellenform\LibTableparser\ParserProvider\XmlParserProvider;
+use Quellenform\LibTableparser\ParserProviderInterface;
 
 /**
  * Class ParserRegistry, which makes it possible to register custom parsers from within an extension.
@@ -27,12 +23,9 @@ use Sonority\LibTableparser\ParserProvider\XlsxParserProvider;
  * Usage:
  *   $parser = GeneralUtility::makeInstance(ParserFactory::class);
  *   $rows = $parser->getData($absFilePath, $fileType, $parserOptions)->getRows();
- *
- * @author Stephan Kellermayr <stephan.kellermayr@gmail.com>
  */
 class ParserRegistry implements \TYPO3\CMS\Core\SingletonInterface
 {
-
     /**
      * Registered parsers
      *
@@ -100,13 +93,16 @@ class ParserRegistry implements \TYPO3\CMS\Core\SingletonInterface
      * @param string $identifier
      * @param string $parserProviderClassName
      * @param array $options
+     *
      * @return void
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
-    public function registerParser($identifier, $parserProviderClassName, array $options = [])
+    public function registerParser($identifier, $parserProviderClassName, array $options = []): void
     {
         if (!in_array(ParserProviderInterface::class, class_implements($parserProviderClassName), true)) {
-            throw new \InvalidArgumentException('An ParserProvider must implement ' . ParserProviderInterface::class . '.');
+            throw new InvalidArgumentException(
+                'An ParserProvider must implement ' . ParserProviderInterface::class . '.'
+            );
         }
         $this->parsers[$identifier] = [
             'provider' => $parserProviderClassName,
@@ -119,9 +115,10 @@ class ParserRegistry implements \TYPO3\CMS\Core\SingletonInterface
      *
      * @param string $fileExtension
      * @param string $parserIdentifier
+     *
      * @return void
      */
-    public function registerFileExtension($fileExtension, $parserIdentifier)
+    public function registerFileExtension($fileExtension, $parserIdentifier): void
     {
         $this->fileExtensionMapping[$fileExtension] = $parserIdentifier;
     }
@@ -131,7 +128,7 @@ class ParserRegistry implements \TYPO3\CMS\Core\SingletonInterface
      *
      * @return array
      */
-    public function getAllRegisteredParsers()
+    public function getAllRegisteredParsers(): array
     {
         return array_keys($this->parsers);
     }
@@ -141,7 +138,7 @@ class ParserRegistry implements \TYPO3\CMS\Core\SingletonInterface
      *
      * @return array
      */
-    public function getAllRegisteredParserFormats()
+    public function getAllRegisteredParserFormats(): array
     {
         return array_keys($this->fileExtensionMapping);
     }
@@ -150,10 +147,11 @@ class ParserRegistry implements \TYPO3\CMS\Core\SingletonInterface
      * Fetches the configuration provided by registerParser()
      *
      * @param string $identifier The parser identifier
-     * @return mixed
+     *
+     * @return array
      * @throws ParserException
      */
-    public function getParserConfigurationByIdentifier($identifier)
+    public function getParserConfigurationByIdentifier($identifier): array
     {
         // If the file extension or the parser identifier is not valid return NULL
         if (isset($this->fileExtensionMapping[$identifier])) {
@@ -162,9 +160,10 @@ class ParserRegistry implements \TYPO3\CMS\Core\SingletonInterface
             if (isset($this->parsers[$identifier])) {
                 return $this->parsers[$identifier];
             } else {
-                throw new ParserException('Parser or filename mapping with identifier "' . $identifier . '" is not registered.');
+                throw new ParserException(
+                    'Parser or filename mapping with identifier "' . $identifier . '" is not registered.'
+                );
             }
         }
     }
-
 }

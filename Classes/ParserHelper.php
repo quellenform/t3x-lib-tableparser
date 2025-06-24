@@ -1,53 +1,69 @@
 <?php
 
-namespace Sonority\LibTableparser;
+namespace Quellenform\LibTableparser;
 
 /*
- * This file is part of the TYPO3 CMS project.
- *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, either version 2
- * of the License, or any later version.
+ * This file is part of the "lib_tableparser" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
  */
+
+use SimpleXMLElement;
+use Quellenform\LibTableparser\Exception\ParserException;
+use ZipArchive;
 
 /**
  * Class ParserHelper
- *
- * @author Stephan Kellermayr <stephan.kellermayr@gmail.com>
  */
 class ParserHelper
 {
-
     /**
      * Encoding list
      *
      * @var array
      */
     public static $encodingList = [
-        'UTF-8', 'ASCII',
-        'ISO-8859-1', 'ISO-8859-2', 'ISO-8859-3', 'ISO-8859-4', 'ISO-8859-5',
-        'ISO-8859-6', 'ISO-8859-7', 'ISO-8859-8', 'ISO-8859-9', 'ISO-8859-10',
-        'ISO-8859-13', 'ISO-8859-14', 'ISO-8859-15', 'ISO-8859-16',
-        'Windows-1251', 'Windows-1252', 'Windows-1254',
+        'UTF-8',
+        'ASCII',
+        'ISO-8859-1',
+        'ISO-8859-2',
+        'ISO-8859-3',
+        'ISO-8859-4',
+        'ISO-8859-5',
+        'ISO-8859-6',
+        'ISO-8859-7',
+        'ISO-8859-8',
+        'ISO-8859-9',
+        'ISO-8859-10',
+        'ISO-8859-13',
+        'ISO-8859-14',
+        'ISO-8859-15',
+        'ISO-8859-16',
+        'Windows-1251',
+        'Windows-1252',
+        'Windows-1254',
     ];
 
     /**
      * Parse XML-data and read the tables/rows/cells into array
      *
-     * @param \SimpleXMLElement $xml
+     * @param SimpleXMLElement $xml
      * @param string $sheetName
      * @param string $rowName
      * @param string $cellName
      * @param string $defaultNamespace
+     *
      * @return array
      */
-    public static function getRowsFromXml(\SimpleXMLElement $xml, $sheetName = '', $rowName = '', $cellName = '', $defaultNamespace = 'ss', $allSheets = false)
-    {
+    public static function getRowsFromXml(
+        SimpleXMLElement $xml,
+        $sheetName = '',
+        $rowName = '',
+        $cellName = '',
+        $defaultNamespace = 'ss',
+        $allSheets = false
+    ): array {
         $data = [];
         // Load namespaces from XML and register them
         foreach ($xml->getDocNamespaces() as $strPrefix => $strNamespace) {
@@ -93,17 +109,19 @@ class ParserHelper
      *
      * @param string $archiveFile
      * @param string $dataFile
-     * @return mixed
+     *
+     * @return string
      */
-    public static function readCompressedFile($archiveFile, $dataFile)
+    public static function readCompressedFile($archiveFile, $dataFile): string
     {
         $data = '';
         // Create ZIP object
-        $zip = new \ZipArchive;
+        $zip = new ZipArchive();
         // Open archive file
         if ($zip->open($archiveFile) === true) {
+            $index = $zip->locateName($dataFile);
             // Search for the data file in the archive
-            if (($index = $zip->locateName($dataFile)) !== false) {
+            if ($index !== false) {
                 // Read file into string
                 $data = $zip->getFromIndex($index);
             }
@@ -119,7 +137,7 @@ class ParserHelper
      * @return void
      * @throws ParserException
      */
-    public static function checkZip()
+    public static function checkZip(): void
     {
         // Check if the PHP-extension for unzipping ODS and XLSX is enabled
         if (!extension_loaded('zip')) {
@@ -128,5 +146,4 @@ class ParserHelper
             }
         }
     }
-
 }

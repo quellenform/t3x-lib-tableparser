@@ -1,35 +1,21 @@
 <?php
 
-/***************************************************************
- * Extension Manager/Repository config file for ext: "lib_tableparser"
- *
- * Auto generated 14-04-2017 11:35
- *
- * Manual updates:
- * Only the data in the array - anything else is removed by next write.
- * "version" and "dependencies" must not be touched!
- ***************************************************************/
-
 $EM_CONF[$_EXTKEY] = [
     'title' => 'TYPO3 Library: Table Parser',
     'description' => '',
     'category' => 'services',
-    'version' => '0.0.1',
-    'state' => 'stable',
-    'uploadfolder' => false,
-    'createDirs' => '',
+    'state' => 'beta',
     'clearcacheonload' => true,
     'author' => 'Stephan Kellermayr',
-    'author_email' => 'stephan.kellermayr@gmail.com',
-    'author_company' => 'sonority.at - MULTIMEDIA ART DESIGN',
+    'author_email' => 'typo3@quellenform.at',
+    'author_company' => 'Kellermayr KG',
+    'version' => '0.1.0',
     'constraints' => [
         'depends' => [
-            'typo3' => '7.4.0-7.6.99',
+            'typo3' => '11.5.0-13.99',
             'extbase' => ''
         ],
-        'conflicts' => [
-        ],
-        'suggests' => [
-        ]
+        'conflicts' => [],
+        'suggests' => []
     ]
 ];
